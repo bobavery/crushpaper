@@ -74,7 +74,7 @@ coinbase_10k|coinbase_50k|kraken_base|kraken_50k` or `--maker/--taker/--slippage
 ```bash
 python -m btc_lab sweep --csv data/btcusd_1h_bitstamp.csv.gz --start 2023-01-01 \
     --fees coinbase_intro --jobs 4 --out results/my_sweep.csv
-scripts/run_sweeps.sh          # the exact sweeps quoted in docs/RESULTS.md (~15 min on 4 cores)
+scripts/run_sweeps.sh          # the exact sweeps quoted in docs/RESULTS.md (~5 min on 4 cores)
 ```
 
 ## Theory: what a target can do
