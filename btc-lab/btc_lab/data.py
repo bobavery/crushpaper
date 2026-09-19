@@ -34,6 +34,10 @@ COINBASE_URL = "https://api.exchange.coinbase.com"
 KRAKEN_URL = "https://api.kraken.com/0/public"
 COLUMNS = ["time", "open", "high", "low", "close", "volume"]
 UA = {"User-Agent": "btc-lab/0.1 (paper-trading research)"}
+COINBASE_GRANULARITIES = {60, 300, 900, 3600, 21600, 86400}          # seconds, per Coinbase Exchange docs
+KRAKEN_INTERVALS = {60: 1, 300: 5, 900: 15, 1800: 30, 3600: 60, 14400: 240, 86400: 1440, 604800: 10080}
+LIVE_GRANULARITIES = sorted(COINBASE_GRANULARITIES & set(KRAKEN_INTERVALS))  # usable with the Kraken fallback
+SETTLE_SECONDS = 90  # a bar is treated as closed only this long after its end, so late revisions are not ingested
 
 
 # ----------------------------------------------------------------------------- normalise
@@ -66,7 +70,7 @@ def normalise(df: pd.DataFrame) -> pd.DataFrame:
         out[c] = pd.to_numeric(df[cols[c]], errors="coerce")
     out["volume"] = pd.to_numeric(df[cols["volume"]], errors="coerce") if "volume" in cols else 0.0
     out = out.dropna(subset=["open", "high", "low", "close"])
-    out = out.sort_values("time").drop_duplicates("time", keep="last").reset_index(drop=True)
+    out = out.sort_values("time", kind="stable").drop_duplicates("time", keep="last").reset_index(drop=True)
     return out[COLUMNS]
 
 
@@ -172,19 +176,23 @@ def spot_price(source: str = "coinbase") -> tuple[float, str]:
 
 
 def fetch_history(days: float = 30, granularity: int = 3600, source: str = "coinbase",
-                  end: Optional[dt.datetime] = None) -> pd.DataFrame:
-    """Fetch `days` of candles ending now (or at `end`), dropping the still-open bar."""
+                  end: Optional[dt.datetime] = None, settle_seconds: int = SETTLE_SECONDS) -> pd.DataFrame:
+    """Fetch `days` of candles ending now (or at `end`), dropping the still-open bar and any bar that
+    closed less than `settle_seconds` ago (exchanges revise the newest candle for a few seconds)."""
     end = end or dt.datetime.now(dt.timezone.utc)
     start = end - dt.timedelta(days=days)
     if source == "coinbase":
+        if granularity not in COINBASE_GRANULARITIES:
+            raise ValueError(f"coinbase granularity must be one of {sorted(COINBASE_GRANULARITIES)}")
         df = fetch_coinbase_candles("BTC-USD", granularity, start, end)
     elif source == "kraken":
-        interval = max(1, granularity // 60)
-        df = fetch_kraken_ohlc("XBTUSD", interval, since=start)
+        if granularity not in KRAKEN_INTERVALS:
+            raise ValueError(f"kraken has no {granularity}s candles; use one of {sorted(KRAKEN_INTERVALS)}")
+        df = fetch_kraken_ohlc("XBTUSD", KRAKEN_INTERVALS[granularity], since=start)
     else:
         raise ValueError(source)
-    # drop the bar that is still forming
-    cutoff = pd.Timestamp(end) .floor(f"{granularity}s") if granularity < 86400 else pd.Timestamp(end).floor("D")
+    settled = pd.Timestamp(end) - pd.Timedelta(seconds=settle_seconds)
+    cutoff = settled.floor(f"{granularity}s") if granularity < 86400 else settled.floor("D")
     return df[df["time"] < cutoff].reset_index(drop=True)
 
 

@@ -11,8 +11,9 @@ Design rules (these are what make the results honest):
     - take-profit is a resting limit sell: filled at tp price if high >= tp (maker fee);
     - stop-loss is a stop-market: filled at sl price minus slippage if low <= sl (taker fee),
       or at the open if the bar opened below the stop (gap);
-    - if BOTH the stop and the target are inside one bar we assume the STOP hit first
-      (conservative; you cannot know the path inside a bar);
+    - if the bar OPENS at or beyond a level, that level fills at the open (a gap), because the
+      open is known; if the bar opens between the two levels and touches both, we assume the
+      STOP hit first (conservative; you cannot know the path inside a bar);
     - a time stop closes the position at that bar's close (taker fee) once max_bars elapsed.
 * Fees are charged on notional at every fill; cash is debited/credited exactly.
 * Equity is marked to market at each bar close.
@@ -173,15 +174,20 @@ class Engine:
 
     # ------------------------------------------------------------------ main step
     def _arrays(self, df: pd.DataFrame):
-        key = (id(df), len(df))
+        key = frame_key(df)
         if getattr(self, "_arr_key", None) != key:
             self._arr = (df["time"].to_numpy(), df["open"].to_numpy(dtype=float), df["high"].to_numpy(dtype=float),
                          df["low"].to_numpy(dtype=float), df["close"].to_numpy(dtype=float))
             self._arr_key = key
+            self._arr_df = df  # keep the frame alive so its id cannot be recycled while cached
         return self._arr
 
-    def step(self, df: pd.DataFrame, i: int) -> None:
-        """Process bar i of df. df must contain time/open/high/low/close columns, ascending."""
+    def step(self, df: pd.DataFrame, i: int, act: bool = True) -> None:
+        """Process bar i of df (time/open/high/low/close, ascending).
+
+        act=False fills nothing new and asks the strategy for nothing: the bar is only used to
+        warm indicators and mark equity (paper accounts use this for bars before they went live).
+        """
         st = self.state
         if i <= st.last_bar:
             return
@@ -217,14 +223,17 @@ class Engine:
         #    only allow their STOP to trigger (not the target) to stay conservative.
         for pos in list(st.positions):
             opened_this_bar = pos.entry_bar == i
+            if (not opened_this_bar) and pos.tp_price is not None and o >= pos.tp_price:
+                # opened at/above the resting limit sell: it filled at the open before any intra-bar path
+                self._close_position(pos, o, maker=True, time=t, bar=i, reason="target", slip=False)
+                continue
             stop_hit = pos.sl_price is not None and l <= pos.sl_price
             tp_hit = (not opened_this_bar) and pos.tp_price is not None and h >= pos.tp_price
             if stop_hit:
                 px = min(o, pos.sl_price)  # gap through the stop fills at the open
                 self._close_position(pos, px, maker=False, time=t, bar=i, reason="stop", slip=True)
             elif tp_hit:
-                px = max(o, pos.tp_price)  # gap above the target fills at the open
-                self._close_position(pos, px, maker=True, time=t, bar=i, reason="target", slip=False)
+                self._close_position(pos, pos.tp_price, maker=True, time=t, bar=i, reason="target", slip=False)
             elif pos.max_bars is not None and (i - pos.entry_bar) >= pos.max_bars:
                 self._close_position(pos, c, maker=False, time=t, bar=i, reason="time", slip=True)
 
@@ -234,9 +243,10 @@ class Engine:
             st.bars_in_market += 1
 
         # 4) ask the strategy for new orders using data up to and including this bar
-        orders = self.strategy.on_bar(df, i, st) or []
-        for order in orders:
-            st.pending.append((order, i))
+        if act:
+            orders = self.strategy.on_bar(df, i, st) or []
+            for order in orders:
+                st.pending.append((order, i))
         st.last_bar = i
 
     def run(self, df: pd.DataFrame, start: int = 0) -> EngineState:
@@ -279,6 +289,15 @@ class Engine:
         st.trades = [Trade(**{**tr, "entry_time": pd.Timestamp(tr["entry_time"]),
                               "exit_time": pd.Timestamp(tr["exit_time"])}) for tr in d["trades"]]
         st.equity_curve = [(pd.Timestamp(t), e) for t, e in d["equity_curve"]]
+
+
+def frame_key(df: pd.DataFrame) -> tuple:
+    """Cache key for a candle frame: identity plus content of the last bar, so a recycled id or an
+    in-place edit of the newest bar cannot return stale arrays."""
+    n = len(df)
+    if n == 0:
+        return (id(df), 0)
+    return (id(df), n, df["time"].iloc[-1], float(df["close"].iloc[-1]), df["time"].iloc[0])
 
 
 def trades_frame(state: EngineState) -> pd.DataFrame:

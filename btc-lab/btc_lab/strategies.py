@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from . import indicators as ind
-from .engine import Order
+from .engine import Order, frame_key
 
 
 class Strategy:
@@ -29,7 +29,7 @@ class Strategy:
 
     def _features(self, df: pd.DataFrame) -> dict:
         """Causal feature arrays (numpy) plus 'close'/'high'/'low'/'time', cached per frame length."""
-        key = (id(df), len(df))
+        key = frame_key(df)
         if key != self._cache_key:
             feat = self.features(df)
             self._feat = {c: feat[c].to_numpy(dtype=float) for c in feat.columns}
@@ -37,6 +37,7 @@ class Strategy:
             self._feat["high"] = df["high"].to_numpy(dtype=float)
             self._feat["low"] = df["low"].to_numpy(dtype=float)
             self._cache_key = key
+            self._cache_df = df  # keep the frame alive so its id cannot be recycled while cached
         return self._feat
 
     def on_bar(self, df: pd.DataFrame, i: int, state) -> list[Order]:

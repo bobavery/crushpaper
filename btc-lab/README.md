@@ -18,8 +18,9 @@ Nothing in this repository can place a real order.
 ## Bottom line (details in `docs/RESULTS.md` and `docs/RESEARCH.md`)
 
 1. A fixed take-profit target does not create expected profit. For a price with no predictable
-   drift, every exit rule has zero expected return before costs and **minus the round-trip fee after
-   costs, on every trade** (`python -m btc_lab theory`).
+   drift, every exit rule with a bounded holding time has zero expected return before costs (and no
+   exit rule can have a positive one), and **minus the round-trip fee after costs, on every trade**
+   (`python -m btc_lab theory`).
 2. On 2023-2026 hourly data, **0 of 300** flip configurations beat buy-and-hold under any real fee
    schedule, and every configuration that used a stop-loss lost money after fees. The only positive
    ones had no stop, which makes them diluted buy-and-hold with the same −54% drawdown.
@@ -28,8 +29,10 @@ Nothing in this repository can place a real order.
    even; the realised hit rate is ~50%.
 4. A wider target "does better" only because it trades less and holds longer, i.e. it is closer to
    holding. Wanting 3-5% instead of 1.5-2% does not change the sign of the edge, only the fee bill.
-5. What *did* help historically: staying out of downtrends (a 200-day moving-average filter kept
-   every strategy flat through 2022) and simply holding through uptrends. Neither is "flipping".
+5. What *did* help historically: staying out of downtrends. A daily 200-day moving-average rule
+   (long above, cash below) kept every strategy flat through 2022 and, over 2017-2026, roughly
+   matched buy-and-hold while being invested only 55% of the time. That is a portfolio rule for the
+   long-term position, not "flipping".
 
 The paper trader exists so you can watch this happen on live prices with fictitious money before
 deciding anything with real money.
@@ -40,7 +43,7 @@ deciding anything with real money.
 cd btc-lab
 python3 -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m pytest -q                                      # 15 tests, ~1 s
+python -m pytest -q                                      # ~5 s
 ```
 
 Python 3.10+; pandas, numpy, requests.
@@ -74,7 +77,7 @@ coinbase_10k|coinbase_50k|kraken_base|kraken_50k` or `--maker/--taker/--slippage
 ```bash
 python -m btc_lab sweep --csv data/btcusd_1h_bitstamp.csv.gz --start 2023-01-01 \
     --fees coinbase_intro --jobs 4 --out results/my_sweep.csv
-scripts/run_sweeps.sh          # the exact sweeps quoted in docs/RESULTS.md (~5 min on 4 cores)
+scripts/run_sweeps.sh          # every number quoted in docs/RESULTS.md (~10 min on 4 cores)
 ```
 
 ## Theory: what a target can do
@@ -84,7 +87,10 @@ python -m btc_lab theory --fees coinbase_intro --vol 0.45
 ```
 
 prints hit probabilities, expected holding time, and expected net return per trade for
-targets 1–5% with stops at 1x and 2x the target, with and without a 72-hour time stop.
+targets 1–5% with stops at 1x and 2x the target, with and without a 72-hour time stop. Costs
+follow the engine's fill model: a target exit pays maker + taker + one slippage, a stop or time
+exit pays taker twice plus slippage twice. Add `--csv data/btcusd_1h_bitstamp.csv.gz` to print
+realised volatility by year.
 
 ## Paper trade on live data
 
@@ -116,9 +122,14 @@ Cron line (Linux/macOS), runs every 10 minutes:
 */10 * * * * cd /path/to/btc-lab && .venv/bin/python -m btc_lab paper step --state paper/zscore_tp2.json >> paper/step.log 2>&1
 ```
 
-Fills follow the backtest rules exactly: an order decided at the close of bar *i* fills at the open
-of bar *i+1*; targets are resting limit orders (maker fee), stops are stop-markets (taker fee +
-slippage); if a bar touches both the stop and the target we assume the stop hit first.
+Fills follow the backtest rules exactly, from the moment the account goes live (`live_since` in the
+report; bars fetched before that only warm the indicators and are excluded from the statistics): an
+order decided at the close of bar *i* fills at the open of bar *i+1*; targets are resting limit
+orders (maker fee), stops are stop-markets (taker fee + slippage); a bar that opens beyond a level
+fills that level at the open; if a bar opens between the stop and the target and touches both, we
+assume the stop hit first. The loop never rewrites bars it has already acted on: late or revised
+candles are reported as data warnings, holes in the candle stream are reported and cancel resting
+orders, and an account whose first fetch is too short for its indicators refuses to start.
 
 ### Go/no-go rule for real money (write it down before you start)
 
@@ -140,7 +151,7 @@ btc_lab/strategies.py  flip / grid / trend / hold
 btc_lab/theory.py      barrier probabilities and Monte Carlo of one round trip
 btc_lab/paper.py       stateful live paper trading
 btc_lab/cli.py         python -m btc_lab ...
-scripts/               dataset builder, sweep runner
+scripts/               dataset builder, sweep/baseline/theory runners, forecast scorer, paper setup
 results/               sweep CSVs and summaries quoted in the docs
 prompts/               01 forecast v2, 02 weekly holder check-in, 03 daily desk supervisor
 docs/                  RESULTS.md (backtests), RESEARCH.md (evidence + platforms), CRITIQUE.md (prompt review)

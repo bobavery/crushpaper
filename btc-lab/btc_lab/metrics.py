@@ -16,10 +16,20 @@ def max_drawdown(equity: pd.Series) -> float:
 
 
 def summarize(state: EngineState, df: pd.DataFrame, initial_cash: float, bars_per_year: int = HOURS_PER_YEAR,
-              fee_rt_pct_for_hold: float = 0.0) -> dict:
+              fee_rt_pct_for_hold: float = 0.0, since=None) -> dict:
+    """Statistics over the equity curve and trades. `since` restricts everything (equity, trades,
+    buy-and-hold benchmark) to bars at or after that timestamp, e.g. a paper account's live start."""
     eq = equity_frame(state)
     tr = trades_frame(state)
-    if eq.empty:
+    if since is not None:
+        since = pd.Timestamp(since)
+        if since.tzinfo is None:
+            since = since.tz_localize("UTC")
+        eq = eq[eq["time"] >= since].reset_index(drop=True)
+        df = df[df["time"] >= since].reset_index(drop=True)
+        if len(tr):
+            tr = tr[pd.to_datetime(tr["exit_time"], utc=True) >= since].reset_index(drop=True)
+    if eq.empty or df.empty:
         return {"error": "no bars processed"}
     equity = eq["equity"].astype(float)
     n_bars = len(equity)
@@ -79,15 +89,22 @@ def bootstrap_ci(x: np.ndarray, n_boot: int = 2000, seed: int = 0) -> list:
     return [round(float(lo), 3), round(float(hi), 3)]
 
 
-def by_period(state: EngineState, df: pd.DataFrame, freq: str = "YS") -> pd.DataFrame:
-    """Strategy return vs buy-and-hold per calendar period (freq 'YS' years, 'QS' quarters, 'MS' months)."""
+def by_period(state: EngineState, df: pd.DataFrame, freq: str = "YS", initial_cash: float | None = None) -> pd.DataFrame:
+    """Strategy return vs buy-and-hold per calendar period (freq 'YS' years, 'QS' quarters, 'MS' months).
+
+    Each period is measured from the previous period's closing value, so the rows chain exactly to
+    the total return: prod(1 + strategy_pct/100) - 1 == total return."""
     eq = equity_frame(state).set_index("time")["equity"].astype(float)
     px = df.set_index("time")["close"].astype(float)
-    e = eq.resample(freq).agg(["first", "last"])
-    p = px.resample(freq).agg(["first", "last"])
+    last_e = eq.resample(freq).last().dropna()
+    first_e = last_e.shift(1)
+    first_e.iloc[0] = float(initial_cash) if initial_cash is not None else float(eq.iloc[0])
+    last_p = px.resample(freq).last().dropna()
+    first_p = last_p.shift(1)
+    first_p.iloc[0] = float(df["open"].iloc[0])
     out = pd.DataFrame({
-        "strategy_pct": 100 * (e["last"] / e["first"] - 1.0),
-        "hold_pct": 100 * (p["last"] / p["first"] - 1.0),
+        "strategy_pct": 100 * (last_e / first_e - 1.0),
+        "hold_pct": 100 * (last_p / first_p - 1.0),
     })
     out["excess_pct"] = out["strategy_pct"] - out["hold_pct"]
     tr = trades_frame(state)

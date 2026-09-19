@@ -165,3 +165,51 @@ def test_normalise_layouts():
     b = normalise(pd.DataFrame({"UNIX_TIMESTAMP": [1736208060], "OPEN": [1], "HIGH": [2], "LOW": [0], "CLOSE": [1], "VOLUME": [1]}))
     c = normalise(pd.DataFrame({"time": ["2025-01-07T00:01:00Z"], "open": [1], "high": [2], "low": [0], "close": [1]}))
     assert str(a["time"].iloc[0]) == "2025-01-07 00:01:00+00:00" == str(b["time"].iloc[0]) == str(c["time"].iloc[0])
+
+
+def test_gap_up_above_target_fills_at_open_not_stop():
+    df = bars([(100, 100, 100, 100), (100, 100, 100, 100), (103, 104, 97, 98)])
+    eng = Engine(OneShot(Order("buy", "market", tp_pct=2.0, sl_pct=2.0), at=0), ZERO, 1000)
+    eng.run(df)
+    t = eng.state.trades[0]
+    assert t.exit_reason == "target" and t.exit_price == 103
+
+
+def test_by_period_rows_chain_to_total_return():
+    from btc_lab.metrics import by_period
+    df = synthetic(24 * 400, seed=9, annual_vol=0.6, annual_drift=0.3)
+    eng = Engine(Flip(tp_pct=2.0, sl_pct=2.0, entry="zscore"), FEE, 1000)
+    eng.run(df); eng.liquidate(df)
+    s = summarize(eng.state, df, 1000)
+    per = by_period(eng.state, df, "MS", initial_cash=1000)
+    chained = 100 * ((1 + per["strategy_pct"] / 100).prod() - 1)
+    assert abs(chained - s["total_return_pct"]) < 0.1   # rows are rounded to 2 decimals
+    hold = 100 * ((1 + per["hold_pct"] / 100).prod() - 1)
+    assert abs(hold - 100 * (df["close"].iloc[-1] / df["open"].iloc[0] - 1)) < 0.1
+
+
+def test_feature_and_array_caches_follow_content_not_id():
+    strat = Flip(tp_pct=1.0, entry="zscore", n=5)
+    eng = Engine(strat, ZERO, 1000)
+    for k in range(20):
+        df = synthetic(30, seed=k, start_price=1000 + k)
+        arrs = eng._arrays(df)
+        feats = strat._features(df)
+        assert arrs[1][0] == df["open"].iloc[0] and feats["close"][-1] == df["close"].iloc[-1]
+        del df
+
+
+def test_kraken_interval_mapping_and_validation(monkeypatch):
+    from btc_lab import data as D
+    import pytest
+    seen = {}
+    def fake(pair, interval, since=None):
+        seen["interval"] = interval
+        return pd.DataFrame({"time": pd.to_datetime([], utc=True), "open": [], "high": [], "low": [], "close": [], "volume": []})
+    monkeypatch.setattr(D, "fetch_kraken_ohlc", fake)
+    D.fetch_history(days=1, granularity=3600, source="kraken")
+    assert seen["interval"] == 60
+    with pytest.raises(ValueError):
+        D.fetch_history(days=1, granularity=21600, source="kraken")
+    with pytest.raises(ValueError):
+        D.fetch_history(days=1, granularity=7200, source="coinbase")

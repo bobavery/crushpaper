@@ -1,17 +1,20 @@
 # Backtest results: can a $5–10k "flip" pool make 1.5–5% per trade?
 
 All numbers below come from `btc_lab` runs on Bitstamp hourly BTC-USD candles (2017-01-01 →
-2026-09-19), reproducible with `scripts/run_sweeps.sh`, `python -m btc_lab theory` and the
-snippets in `results/`. Start capital $10,000 per test, all-in per trade. Fees are charged on every
-fill; targets are limit orders (maker), entries and stops are market orders (taker + 0.02% slippage).
+2026-09-19). `scripts/run_sweeps.sh` regenerates every one of them (sweep CSVs, `results/sweep_summary.txt`,
+`results/baselines.txt`, `results/theory_notes.txt`), and each block in those files starts with the
+exact command that produced it. Start capital $10,000 per test, all-in per trade. Fees are charged
+on every fill. Market entries (`immediate`, `zscore`, `rsi`, `breakout`) and stops pay the taker fee
+plus 0.02% slippage; `dip` entries and take-profit targets are resting limit orders and pay the
+maker fee with no slippage. Indicators are warmed up on 250 days of data before the start date.
 
-Fee presets used (percent of notional, maker / taker):
+Fee presets used (percent of notional):
 
-| preset | maker | taker | round trip (market in, limit out, slippage) |
-|---|---|---|---|
-| `zero` | 0 | 0 | 0.00% (impossible; shown to separate skill from cost) |
-| `coinbase_50k` | 0.15 | 0.25 | 0.44% |
-| `coinbase_intro` | 0.40 | 0.60 | 1.04% |
+| preset | maker | taker | round trip when the target fills | round trip when the stop fills |
+|---|---|---|---|---|
+| `zero` | 0 | 0 | 0.00% (impossible; shown to separate skill from cost) | 0.00% |
+| `coinbase_50k` | 0.15 | 0.25 | 0.42% | 0.54% |
+| `coinbase_intro` | 0.40 | 0.60 | 1.02% | 1.24% |
 
 (`docs/RESEARCH.md` discusses the actual 2026 fee schedules; change presets with `--maker/--taker`.)
 
@@ -107,15 +110,15 @@ it did nothing.
 
 ## 3. Grid bots (`results/baselines.txt`)
 
-Spot grids with 5–10 levels 1–3% apart, 2023–2026 hourly:
+Spot grids with 4–10 levels 1–3% apart, 2023–2026 hourly, $10k split across the levels:
 
-| fees | grid | total return | hold | trades | win rate | fees paid / start capital | max drawdown |
-|---|---|---|---|---|---|---|---|
-| `zero` | 1% × 5 | +275% | +391% | 831 | 99.4% | 0% | −52% |
-| `coinbase_intro` | 1% × 5 | **−1%** | +385% | 831 | 99.4% | 164% | −52% |
-| `coinbase_intro` | 2% × 5 | +64% | +385% | 364 | 98.6% | 93% | −50% |
-| `coinbase_intro` | 3% × 4 | +96% | +385% | 195 | 97.9% | 70% | −49% |
-| `coinbase_intro`, 2022 | 1% × 5 | −64% | −65% | 41 | 87.8% | 6% | −66% |
+| fees | grid | total return | hold | trades | win rate | fees paid / start capital | time invested | max drawdown |
+|---|---|---|---|---|---|---|---|---|
+| `zero` | 1% × 5 | +275% | +391% | 831 | 99.4% | 0% | 95% | −52% |
+| `coinbase_intro` | 1% × 5 | **−1%** | +385% | 831 | 99.4% | 164% | 95% | −52% |
+| `coinbase_intro` | 2% × 5 | +64% | +385% | 364 | 98.6% | 93% | 90% | −50% |
+| `coinbase_intro` | 3% × 4 | +96% | +385% | 195 | 97.9% | 70% | 85% | −49% |
+| `coinbase_intro`, 2022 | 1% × 5 | −64% | −65% | 41 | 87.8% | 6% | 100% | −66% |
 
 A 99% win rate and a −52% drawdown in the same row is the whole story of grid bots: they harvest
 small wins until the trend goes against them, then they are fully invested at the top.
@@ -123,14 +126,18 @@ small wins until the trend goes against them, then they are fully invested at th
 ## 4. The only thing that "worked": not trading in downtrends
 
 Daily 200-day moving-average trend rule (long above, cash below, 2% band, `coinbase_intro`),
-2017-06 → 2026-09: +387% vs +3,387% for holding, 18 trades, −63% max drawdown, but **0%** in 2022
-vs −65% for holding. Trend rules lose to holding in bull markets and protect in bear markets; they
-are a *portfolio* decision for the $70k position, not a flip strategy for the $5–10k pool.
+2017-06 → 2026-09 (`results/baselines.txt`): **+3,134% vs +3,387% for holding**, 18 trades,
+invested 55% of the time, −65% max drawdown, fees equal to 304% of the starting capital, and
+**0% in 2022 vs −64% for holding**. Year by year the rule trailed holding in every bull year and
+protected in both bear years (2018: −52% vs −73%; 2022: 0% vs −64%). Over the whole window it
+roughly matched holding with half the time exposed. Trend rules are a *portfolio* decision for the
+$70k position, not a flip strategy for the $5–10k pool.
 
 ## 5. What this means for the plan
 
-1. Do not put real money into a fixed-target flip. The backtest, the theory and (see
-   `docs/RESEARCH.md`) the academic evidence agree.
+1. Do not put real money into a fixed-target flip. The theory (section 1) and the backtests
+   (sections 2–3) agree; `docs/RESEARCH.md` collects the published evidence on retail short-horizon
+   trading, which points the same way.
 2. If you want to see it for yourself, run the paper accounts for 8 weeks
    (`README.md`, "Paper trade on live data"): four targets, same entry, same fees, plus a `hold`
    account. Judge them by expectancy per trade with its confidence interval, not by win rate.
@@ -139,8 +146,9 @@ are a *portfolio* decision for the $70k position, not a flip strategy for the $5
 
 ## Caveats
 
-* Bitstamp candles, not Coinbase; intra-bar path unknown (we assume the stop hits first when a bar
-  contains both the stop and the target); fixed slippage; no taxes.
+* Bitstamp candles, not Coinbase; intra-bar path unknown (a bar that opens beyond a level fills
+  it at the open; if it opens between the stop and the target and touches both, we assume the stop
+  hit first); fixed slippage; no taxes.
 * 2023–2026 is dominated by a bull run. Flip strategies with no stop look good in it *because* it
   is a bull run. A sideways year with 30% volatility would be worse for every row above.
 * Parameter sweeps flatter the best row (selection bias). We report medians and counts for that

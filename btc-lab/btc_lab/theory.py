@@ -30,13 +30,17 @@ def expected_hit_time(a: float, b: float, sigma: float) -> float:
     return a * b / sigma ** 2
 
 
-def simulate_flip(tp_pct: float, sl_pct: float | None, fee_rt_pct: float, annual_vol: float = 0.55,
+def simulate_flip(tp_pct: float, sl_pct: float | None, fee_target_pct: float, annual_vol: float = 0.55,
                   annual_drift: float = 0.0, max_hours: float | None = None, n_paths: int = 20000,
-                  seed: int = 0, step_minutes: int = 5) -> dict:
+                  seed: int = 0, step_minutes: int = 5, fee_stop_pct: float | None = None) -> dict:
     """Monte Carlo of ONE round trip: buy now, exit at +tp, -sl, or time stop. GBM, no predictability.
 
+    fee_target_pct is the round-trip cost when the exit is the resting limit target (market entry +
+    limit exit); fee_stop_pct (default: same) is the cost when the exit is a stop or time stop
+    (market entry + market exit, slippage both ways), matching the engine's fill model.
     Returns hit probabilities, mean net return per trade (percent), and mean holding hours.
     """
+    fee_stop_pct = fee_target_pct if fee_stop_pct is None else fee_stop_pct
     rng = np.random.default_rng(seed)
     dt_years = step_minutes / 60.0 / HOURS_PER_YEAR
     sig = annual_vol * math.sqrt(dt_years)
@@ -74,10 +78,12 @@ def simulate_flip(tp_pct: float, sl_pct: float | None, fee_rt_pct: float, annual
     # time-stopped paths exit at the current log price
     still = alive
     exit_ret[still] = x[still]; reason[still] = 3
-    net = (np.exp(exit_ret) - 1.0) * 100.0 - fee_rt_pct
+    fees = np.where(reason == 1, fee_target_pct, fee_stop_pct)
+    net = (np.exp(exit_ret) - 1.0) * 100.0 - fees
     hours = exit_step * step_minutes / 60.0
     return {
-        "tp_pct": tp_pct, "sl_pct": sl_pct, "max_hours": max_hours, "fee_rt_pct": fee_rt_pct,
+        "tp_pct": tp_pct, "sl_pct": sl_pct, "max_hours": max_hours,
+        "fee_target_pct": fee_target_pct, "fee_stop_pct": fee_stop_pct,
         "annual_vol": annual_vol, "annual_drift": annual_drift,
         "p_target": float((reason == 1).mean()), "p_stop": float((reason == 2).mean()), "p_time": float((reason == 3).mean()),
         "mean_net_ret_pct": float(net.mean()), "median_net_ret_pct": float(np.median(net)),
@@ -87,14 +93,15 @@ def simulate_flip(tp_pct: float, sl_pct: float | None, fee_rt_pct: float, annual
     }
 
 
-def target_table(fee_rt_pct: float, annual_vol: float = 0.55, annual_drift: float = 0.0,
+def target_table(fee_target_pct: float, annual_vol: float = 0.55, annual_drift: float = 0.0,
                  targets=(1.0, 1.5, 2.0, 3.0, 4.0, 5.0), stop_mult=(1.0, 2.0), max_hours=(None, 72),
-                 n_paths: int = 10000) -> list[dict]:
+                 n_paths: int = 10000, fee_stop_pct: float | None = None) -> list[dict]:
     rows = []
     for tp in targets:
         for m in stop_mult:
             for mh in max_hours:
-                rows.append(simulate_flip(tp, tp * m, fee_rt_pct, annual_vol, annual_drift, mh, n_paths))
+                rows.append(simulate_flip(tp, tp * m, fee_target_pct, annual_vol, annual_drift, mh, n_paths,
+                                          fee_stop_pct=fee_stop_pct))
     return rows
 
 

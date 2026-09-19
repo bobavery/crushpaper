@@ -119,7 +119,7 @@ def cmd_backtest(a):
                                 trade_start=a.start)
     print(json.dumps({"strategy": a.strategy, "params": params, "fees": fee.__dict__}, indent=1))
     print(json.dumps(summary, indent=1))
-    print(by_period(eng.state, D.slice_range(df, a.start), a.period).to_string())
+    print(by_period(eng.state, D.slice_range(df, a.start), a.period, initial_cash=a.cash).to_string())
     if a.trades_out:
         trades_frame(eng.state).to_csv(a.trades_out, index=False)
         print("trades ->", a.trades_out)
@@ -168,10 +168,12 @@ def cmd_sweep(a):
 
 def cmd_theory(a):
     fee = _fees(a)
-    fee_rt = fee.maker_pct + fee.taker_pct + 2 * fee.slippage_pct  # limit exit, market entry
-    print(f"fees preset {fee.name}: round trip (market in, limit out, slippage) = {fee_rt:.3f}%")
-    print(f"annual vol {a.vol:.0%}, annual drift {a.drift:.0%}\n")
-    rows = T.target_table(fee_rt, a.vol, a.drift, n_paths=a.paths)
+    fee_target = fee.maker_pct + fee.taker_pct + fee.slippage_pct        # market entry, limit (target) exit
+    fee_stop = 2 * fee.taker_pct + 2 * fee.slippage_pct                  # market entry, market (stop/time) exit
+    print(f"# python -m btc_lab theory --fees {fee.name} --vol {a.vol} --drift {a.drift} --paths {a.paths} (seed 0, 5-minute steps)")
+    print(f"fees preset {fee.name}: round trip when the target fills = {fee_target:.2f}%; when the stop/time stop fills = {fee_stop:.2f}%")
+    print(f"GBM annual vol {a.vol:.0%}, annual drift {a.drift:.0%}. Monte Carlo sampling error at {a.paths} paths: about +/-0.05% on net return, +/-0.01 on probabilities.\n")
+    rows = T.target_table(fee_target, a.vol, a.drift, n_paths=a.paths, fee_stop_pct=fee_stop)
     df = pd.DataFrame(rows)[["tp_pct", "sl_pct", "max_hours", "p_target", "p_stop", "p_time", "mean_net_ret_pct",
                              "mean_hours", "trades_per_month_if_always_in", "monthly_expectancy_pct_if_always_in"]]
     print(df.round(3).to_string(index=False))
@@ -179,7 +181,18 @@ def cmd_theory(a):
     sig_h = a.vol / (24 * 365) ** 0.5
     for tp in (1.0, 1.5, 2.0, 3.0, 5.0):
         a_, b_ = tp / 100, tp / 100
-        print(f"  tp=sl={tp}%  P(target)={T.p_up_first(a_, b_):.3f}  E[hours]={T.expected_hit_time(a_, b_, sig_h):.1f}")
+        print(f"  tp=sl={tp}%  P(target)={T.p_up_first(a_, b_):.3f}  E[hours]={T.expected_hit_time(a_, b_, sig_h):.1f};  "
+              f"tp={tp}% sl={2 * tp}%  P(target)={T.p_up_first(a_, 2 * b_):.3f}  E[hours]={T.expected_hit_time(a_, 2 * b_, sig_h):.1f}")
+    if a.drift_check:
+        mu_h = (a.drift_check - 0.5 * a.vol ** 2) / (24 * 365)
+        print(f"\nwith {a.drift_check:+.0%}/yr drift: " + ", ".join(
+            f"tp=sl={tp}% P(target)={T.p_up_first(tp / 100, tp / 100, mu_h, sig_h):.3f}" for tp in (1.0, 2.0, 3.0, 5.0)))
+    if a.csv:
+        df_px = D.load_csv(a.csv)
+        print(f"\nrealised annualised volatility by year from {a.csv} (hourly log returns):")
+        for y, grp in df_px.groupby(df_px["time"].dt.year):
+            if len(grp) > 24 * 30:
+                print(f"  {y}: {T.realized_annual_vol(grp['close']):.1%}  (bars {len(grp)}, return {grp['close'].iloc[-1] / grp['open'].iloc[0] - 1:+.1%})")
 
 
 def cmd_price(a):
@@ -223,7 +236,8 @@ def cmd_paper(a):
             rows.append({"account": pathlib.Path(path).stem, "strategy": acct.cfg["strategy"],
                          "tp": acct.cfg["params"].get("tp_pct"), "sl": acct.cfg["params"].get("sl_pct"),
                          "entry": acct.cfg["params"].get("entry"), "fees": acct.cfg["fees"]["name"],
-                         **{k: r.get(k) for k in ["start", "end", "total_return_pct", "buy_hold_return_pct", "n_trades",
+                         "live_since": (acct.cfg.get("trade_from") or "")[:16],
+                         **{k: r.get(k) for k in ["end", "total_return_pct", "buy_hold_return_pct", "n_trades",
                                                  "win_rate_pct", "expectancy_pct_per_trade", "expectancy_ci95_pct",
                                                  "max_drawdown_pct", "fees_pct_of_initial", "exposure_pct"]}})
         print(pd.DataFrame(rows).to_string(index=False))
@@ -253,8 +267,11 @@ def build_parser():
     s.set_defaults(fn=cmd_sweep)
 
     t = sub.add_parser("theory"); add_strategy_args(t)
-    t.add_argument("--vol", type=float, default=0.55); t.add_argument("--drift", type=float, default=0.0)
-    t.add_argument("--paths", type=int, default=10000)
+    t.add_argument("--vol", type=float, default=0.45); t.add_argument("--drift", type=float, default=0.0)
+    t.add_argument("--paths", type=int, default=20000)
+    t.add_argument("--drift-check", dest="drift_check", type=float, default=0.6,
+                   help="also print P(target) with this annual drift (0 to skip)")
+    t.add_argument("--csv", default=None, help="print realised volatility by year from this candle CSV")
     t.set_defaults(fn=cmd_theory)
 
     pr = sub.add_parser("price"); pr.add_argument("--source", default="coinbase", choices=["coinbase", "kraken"])
@@ -267,7 +284,7 @@ def build_parser():
             q.add_argument("--states", nargs="+", required=True); continue
         q.add_argument("--state", required=True)
         if name == "create":
-            add_strategy_args(q); q.add_argument("--granularity", type=int, default=3600)
+            add_strategy_args(q); q.add_argument("--granularity", type=int, default=3600, choices=D.LIVE_GRANULARITIES)
             q.add_argument("--source", default="coinbase", choices=["coinbase", "kraken"])
             q.add_argument("--history-days", dest="history_days", type=float, default=45.0)
             q.add_argument("--no-step", dest="no_step", action="store_true")
