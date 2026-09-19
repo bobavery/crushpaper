@@ -292,12 +292,10 @@ class Engine:
 
 
 def frame_key(df: pd.DataFrame) -> tuple:
-    """Cache key for a candle frame: identity plus content of the last bar, so a recycled id or an
-    in-place edit of the newest bar cannot return stale arrays."""
-    n = len(df)
-    if n == 0:
-        return (id(df), 0)
-    return (id(df), n, df["time"].iloc[-1], float(df["close"].iloc[-1]), df["time"].iloc[0])
+    """Cache key for a candle frame. Callers keep a reference to the cached frame alongside the key,
+    so its id cannot be recycled by a later frame while the entry exists; the key itself stays cheap
+    because it is evaluated on every bar."""
+    return (id(df), len(df))
 
 
 def trades_frame(state: EngineState) -> pd.DataFrame:
