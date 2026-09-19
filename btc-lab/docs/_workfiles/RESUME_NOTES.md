@@ -13,10 +13,11 @@ Temporary file; delete when the work is finished.
   the research/critique outputs (R7: docs/RESEARCH.md, docs/CRITIQUE.md, prompts/01, prompts/02).
 
 ## In progress when paused
-- `scripts/run_sweeps.sh` was re-running the sweeps with the corrected fill rule (a bar opening
-  beyond the target now fills at the open). Re-run it (~10 min on 4 cores), then update
-  `docs/RESULTS.md` section 2 tables and the section 1 theory table from `results/sweep_summary.txt`
-  and `results/theory_notes.txt` (theory now prints separate target/stop round-trip costs).
+- DONE: `scripts/run_sweeps.sh` re-ran with the corrected fill rule; `results/` is current and
+  committed. Headline counts are unchanged (0/300 beat hold under real fees, 0/240 stop-protected
+  configs positive). STILL TO DO: update `docs/RESULTS.md` section 2 tables and the section 1 theory
+  table from `results/sweep_summary.txt` and `results/theory_notes.txt` (theory now prints separate
+  target/stop round-trip costs, 20000 paths).
 - Critique/research workflow (run id wf_f11a278a-701) was stopped after: 6 critics, 7 research
   sweeps, merge-findings and completeness-critic finished. Their structured outputs are saved in
   `docs/_workfiles/critique_research_partial.json`. Remaining stages: refute findings (batched),
