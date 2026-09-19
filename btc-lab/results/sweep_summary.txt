@@ -1,0 +1,376 @@
+
+##### results/sweep_2022_coinbase_50k.csv: 300 configs; hold=-64.43%  period 2022-01-01 -> 2022-12-31
+beats hold: 168/300; positive: 0/300; positive expectancy/trade: 0/300
+median total return -28.5%; median expectancy/trade -0.742%
+-- top 6 by total return
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+ breakout 5.0 5.0   4800.0               0.0               -64.43         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 3.0   4800.0               0.0               -64.43         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+immediate 1.0 NaN   4800.0               0.0               -64.43         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 2.0   4800.0               0.0               -64.43         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+immediate 1.0 1.0   4800.0               0.0               -64.43         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 1.0   4800.0               0.0               -64.43         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+-- bottom 3
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 1.0 1.0      NaN            -99.99               -64.43      1758          44.3                    -0.517            -99.99                80.41          56.2            2.8             146.5
+immediate 1.5 1.0      NaN            -99.99               -64.43      1607          35.8                    -0.544            -99.99                84.05          81.3            4.4             133.9
+immediate 2.0 1.0      NaN            -99.96               -64.43      1362          30.1                    -0.556            -99.96                75.93          84.1            5.4             113.5
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med    exp    win  trades    mdd
+tp                                              
+1.0 -40.20   -30.12  -3.73  64.26  193.10 -40.73
+1.5 -40.23   -29.64  -5.44  54.87  161.82 -40.68
+2.0 -39.07   -28.61  -8.49  45.93  142.42 -39.67
+3.0 -39.15   -30.28 -11.59  34.08  117.62 -39.76
+4.0 -37.89   -28.79 -12.24  28.71  100.58 -38.66
+5.0 -37.87   -28.50 -12.28  24.86   90.90 -38.70
+-- by entry
+             ret  ret_med    exp  trades
+entry                                   
+breakout  -33.36   -28.50 -11.51   57.50
+dip       -41.34   -31.92  -9.02  150.77
+immediate -45.00   -32.66 -11.41  278.47
+rsi       -35.96   -28.61  -3.64   64.87
+zscore    -39.68   -30.12  -9.23  120.43
+-- by stop
+        ret    exp    win    mdd
+sl                              
+1.0  -43.29  -0.58  26.53 -43.44
+2.0  -41.94  -0.69  39.92 -42.18
+3.0  -39.89  -0.74  49.20 -40.43
+5.0  -38.21  -0.88  60.08 -38.90
+none -31.99 -41.92  34.85 -33.56
+-- by trend filter
+           ret   exp  trades   mdd
+trend_n                           
+4800.0    0.00   NaN    0.00   0.0
+none    -78.13 -8.96  268.81 -79.4
+
+##### results/sweep_2022_coinbase_intro.csv: 300 configs; hold=-64.68%  period 2022-01-01 -> 2022-12-31
+beats hold: 157/300; positive: 0/300; positive expectancy/trade: 0/300
+median total return -30.0%; median expectancy/trade -1.381%
+-- top 6 by total return
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+ breakout 5.0 5.0   4800.0               0.0               -64.68         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 3.0   4800.0               0.0               -64.68         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+immediate 1.0 NaN   4800.0               0.0               -64.68         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 2.0   4800.0               0.0               -64.68         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+immediate 1.0 1.0   4800.0               0.0               -64.68         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 1.0   4800.0               0.0               -64.68         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+-- bottom 3
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 1.0 1.0      NaN            -99.99               -64.68       785           7.5                    -1.160            -99.99                87.34          26.6            3.0              65.4
+immediate 1.0 2.0      NaN            -99.99               -64.68       749           9.5                    -1.211            -99.99                81.52          39.8            4.7              62.4
+immediate 5.0 1.0      NaN            -99.99               -64.68       709          15.1                    -1.269            -99.99                82.97          87.3           10.8              59.1
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med    exp    win  trades    mdd
+tp                                              
+1.0 -44.91   -31.75  -4.32  20.52  161.30 -45.12
+1.5 -44.65   -30.96  -6.03  54.87  140.90 -44.90
+2.0 -44.06   -30.00  -9.06  45.88  128.32 -44.38
+3.0 -43.96   -30.77 -12.16  34.02  111.02 -44.27
+4.0 -43.19   -31.60 -12.81  28.61   97.92 -43.53
+5.0 -43.05   -31.42 -12.85  24.77   90.80 -43.42
+-- by entry
+             ret  ret_med    exp  trades
+entry                                   
+breakout  -41.25   -32.76 -12.08   57.50
+dip       -45.39   -32.52  -9.52  150.77
+immediate -46.29   -32.78 -11.99  214.98
+rsi       -42.12   -30.00  -4.27   64.87
+zscore    -44.80   -32.28  -9.82  120.43
+-- by stop
+        ret    exp    win    mdd
+sl                              
+1.0  -48.42  -1.23  21.79 -48.42
+2.0  -47.62  -1.32  33.29 -47.64
+3.0  -46.53  -1.37  41.52 -46.61
+5.0  -44.92  -1.49  51.09 -45.10
+none -32.37 -42.27  26.21 -33.57
+-- by trend filter
+           ret   exp  trades    mdd
+trend_n                            
+4800.0    0.00   NaN    0.00   0.00
+none    -87.94 -9.54  243.42 -88.54
+
+##### results/sweep_2022_zero.csv: 300 configs; hold=-64.25%  period 2022-01-01 -> 2022-12-31
+beats hold: 259/300; positive: 0/300; positive expectancy/trade: 0/300
+median total return -4.3%; median expectancy/trade -0.288%
+-- top 6 by total return
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+ breakout 5.0 5.0   4800.0               0.0               -64.25         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 3.0   4800.0               0.0               -64.25         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+immediate 1.0 NaN   4800.0               0.0               -64.25         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 2.0   4800.0               0.0               -64.25         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+immediate 1.0 1.0   4800.0               0.0               -64.25         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+ breakout 5.0 1.0   4800.0               0.0               -64.25         0           NaN                       NaN               0.0                  0.0           NaN            NaN               NaN
+-- bottom 3
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 2.0 2.0      NaN            -73.90               -64.25       782          45.5                    -0.151            -74.85                  0.0          90.8           10.2              65.2
+immediate 4.0 2.0      NaN            -73.46               -64.25       457          29.1                    -0.253            -74.43                  0.0          94.5           18.1              38.1
+immediate 1.5 2.0      NaN            -71.79               -64.25       927          52.4                    -0.120            -75.92                  0.0          89.1            8.4              77.3
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med    exp    win  trades    mdd
+tp                                              
+1.0 -23.49    -7.59  -3.32  64.48  197.78 -26.40
+1.5 -26.65    -5.86  -5.03  55.11  161.16 -28.88
+2.0 -24.92    -4.32  -8.07  46.32  142.14 -27.72
+3.0 -25.95    -9.26 -11.17  34.35  117.14 -28.91
+4.0 -25.22    -8.20 -11.83  28.79  100.06 -28.64
+5.0 -25.48    -6.15 -11.86  24.96   90.66 -29.37
+-- by entry
+             ret  ret_med    exp  trades
+entry                                   
+breakout  -19.85    -4.32 -11.08   57.47
+dip       -27.94   -11.00  -8.69  150.77
+immediate -32.69   -26.16 -10.98  281.53
+rsi       -24.57   -18.18  -3.19   64.53
+zscore    -21.37    -6.76  -8.80  119.82
+-- by stop
+        ret    exp    win    mdd
+sl                              
+1.0  -18.97  -0.10  26.90 -23.95
+2.0  -25.10  -0.23  40.24 -27.64
+3.0  -24.20  -0.29  49.47 -27.47
+5.0  -26.43  -0.44  60.22 -28.98
+none -31.72 -41.66  34.85 -33.55
+-- by trend filter
+           ret   exp  trades    mdd
+trend_n                            
+4800.0    0.00   NaN    0.00   0.00
+none    -50.57 -8.55  269.65 -56.64
+
+##### results/sweep_2023-2026_coinbase_50k.csv: 300 configs; hold=388.18%  period 2023-01-01 -> 2026-09-19
+beats hold: 0/300; positive: 59/300; positive expectancy/trade: 62/300
+median total return -80.3%; median expectancy/trade -0.417%
+-- top 6 by total return
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 5.0 NaN      NaN            342.10               388.18        44          97.7                     3.668            -53.84                54.84          99.8          738.5               1.0
+      dip 4.0 NaN      NaN            268.03               388.18        49          98.0                     2.893            -53.48                40.62          97.8          650.2               1.1
+      dip 5.0 NaN      NaN            264.00               388.18        38          97.4                     3.691            -53.84                30.84          98.2          841.9               0.9
+   zscore 5.0 NaN      NaN            257.54               388.18        39          97.4                     3.571            -53.43                42.06          94.7          790.6               0.9
+immediate 3.0 NaN      NaN            254.61               388.18        68          98.5                     2.021            -53.96                73.08          99.7          477.5               1.5
+ breakout 5.0 NaN      NaN            253.39               388.18        39          97.4                     3.551            -53.84                42.05          99.1          827.2               0.9
+-- bottom 3
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 1.0 1.0   4800.0            -99.99               388.18      1888          47.6                    -0.481            -99.99               101.26          28.0            4.8              42.3
+immediate 1.0 1.0      NaN            -99.99               388.18      2041          49.0                    -0.444            -99.99               113.92          36.4            5.8              45.8
+immediate 1.0 2.0      NaN            -99.99               388.18      2156          66.0                    -0.415            -99.99               123.50          68.4           10.3              48.3
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med   exp    win  trades    mdd
+tp                                             
+1.0 -62.91   -91.01 -0.29  73.12  687.40 -83.57
+1.5 -55.80   -89.29 -0.25  66.42  584.22 -83.06
+2.0 -50.03   -83.43 -0.17  61.73  511.04 -81.86
+3.0 -40.69   -76.33 -0.01  54.93  418.32 -78.99
+4.0 -31.97   -73.67  0.15  49.98  354.26 -77.53
+5.0 -22.94   -67.43  0.33  46.29  305.38 -76.00
+-- by entry
+             ret  ret_med   exp  trades
+entry                                  
+breakout  -41.84   -77.14 -0.01  351.57
+dip       -36.95   -81.81  0.08  508.30
+immediate -39.95   -94.41  0.04  843.00
+rsi       -53.76   -70.94 -0.26  222.62
+zscore    -47.79   -86.33 -0.06  458.37
+-- by stop
+         ret   exp    win    mdd
+sl                              
+1.0   -93.76 -0.48  29.70 -94.05
+2.0   -88.26 -0.48  44.78 -89.61
+3.0   -81.67 -0.45  54.66 -85.33
+5.0   -67.94 -0.38  66.68 -78.50
+none  111.33  1.58  97.91 -53.36
+-- by trend filter
+           ret   exp  trades    mdd
+trend_n                            
+4800.0  -48.53 -0.09  340.57 -75.63
+none    -39.59  0.01  612.97 -84.71
+
+##### results/sweep_2023-2026_coinbase_intro.csv: 300 configs; hold=384.75%  period 2023-01-01 -> 2026-09-19
+beats hold: 0/300; positive: 45/300; positive expectancy/trade: 48/300
+median total return -97.9%; median expectancy/trade -1.034%
+-- top 6 by total return
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 5.0 NaN      NaN            239.30               384.75        44          97.7                     3.048            -53.84               115.51          99.8          738.5               1.0
+      dip 5.0 NaN      NaN            200.71               384.75        38          97.4                     3.172            -53.84                72.73          98.2          841.9               0.9
+      dip 4.0 NaN      NaN            187.77               384.75        49          98.0                     2.378            -53.56                92.59          97.8          650.2               1.1
+   zscore 5.0 NaN      NaN            182.74               384.75        39          97.4                     2.950            -53.43                90.64          94.7          790.6               0.9
+ breakout 5.0 NaN      NaN            179.47               384.75        39          97.4                     2.931            -53.84                90.62          99.1          827.2               0.9
+immediate 4.0 NaN      NaN            160.23               384.75        49          98.0                     2.170            -53.84               108.45          99.8          663.1               1.1
+-- bottom 3
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 1.0 1.0   4800.0            -99.99               384.75       842           5.9                    -1.082            -99.99                97.28          13.2            5.1              18.9
+immediate 1.0 1.0      NaN            -99.99               384.75       859           5.2                    -1.062            -99.99               111.64          19.8            7.5              19.3
+immediate 4.0 1.0      NaN            -99.99               384.75       870          22.6                    -1.030            -99.99               137.57          47.5           17.8              19.5
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med   exp    win  trades    mdd
+tp                                             
+1.0 -84.19   -99.66 -0.89  19.69  533.98 -89.28
+1.5 -77.26   -99.48 -0.85  66.50  474.40 -89.14
+2.0 -71.78   -98.84 -0.78  61.85  434.68 -88.88
+3.0 -63.40   -96.68 -0.62  55.03  373.54 -87.90
+4.0 -56.46   -95.54 -0.47  50.03  328.40 -86.95
+5.0 -49.46   -91.85 -0.30  46.32  290.16 -85.90
+-- by entry
+             ret  ret_med   exp  trades
+entry                                  
+breakout  -67.21   -97.50 -0.65  350.53
+dip       -62.30   -98.72 -0.46  479.75
+immediate -64.90   -99.92 -0.58  570.17
+rsi       -72.07   -90.78 -0.89  222.62
+zscore    -68.99   -98.75 -0.69  406.23
+-- by stop
+        ret   exp    win    mdd
+sl                             
+1.0  -99.39 -1.12  24.36 -99.40
+2.0  -98.15 -1.10  37.24 -98.21
+3.0  -96.15 -1.06  45.85 -96.49
+5.0  -91.01 -0.99  56.55 -92.51
+none  49.23  1.00  85.51 -53.43
+-- by trend filter
+           ret   exp  trades    mdd
+trend_n                            
+4800.0  -70.06 -0.71  310.31 -86.27
+none    -64.13 -0.60  501.41 -89.75
+
+##### results/sweep_2023-2026_coinbase_intro_4h.csv: 300 configs; hold=384.75%  period 2023-01-01 -> 2026-09-19
+beats hold: 0/300; positive: 45/300; positive expectancy/trade: 47/300
+median total return -87.5%; median expectancy/trade -0.970%
+-- top 6 by total return
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 5.0 NaN      NaN            220.80               384.75        42          97.6                     3.039            -53.56               105.16          99.2          192.2               0.9
+      dip 5.0 NaN      NaN            206.25               384.75        39          97.4                     3.159            -53.56                76.54          97.1          202.7               0.9
+ breakout 5.0 NaN      NaN            190.18               384.75        39          97.4                     2.995            -53.56                90.81          93.2          194.7               0.9
+immediate 4.0 NaN      NaN            171.95               384.75        50          98.0                     2.214            -53.58               113.88          99.1          161.3               1.1
+      dip 4.0 NaN      NaN            159.65               384.75        45          97.8                     2.339            -53.56                78.74          96.5          174.7               1.0
+      dip 3.0 NaN      NaN            136.81               384.75        61          98.4                     1.572            -53.28               101.26          94.8          126.6               1.4
+-- bottom 3
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 3.0 1.0   1200.0            -99.99               384.75       799          25.2                    -1.130            -99.99               110.49          31.7            3.2              17.9
+immediate 3.0 2.0      NaN            -99.99               384.75       877          41.6                    -1.012            -99.99               140.06          72.2            6.7              19.7
+immediate 4.0 1.0   1200.0            -99.99               384.75       755          20.1                    -1.149            -99.99               121.35          42.2            4.5              16.9
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med   exp    win  trades    mdd
+tp                                             
+1.0 -74.38   -93.71 -0.87  28.15  355.72 -81.40
+1.5 -69.80   -93.18 -0.83  65.87  323.94 -81.26
+2.0 -62.68   -90.04 -0.72  62.39  298.60 -79.80
+3.0 -54.52   -90.17 -0.59  55.30  261.42 -79.25
+4.0 -49.22   -83.02 -0.43  50.87  230.84 -77.45
+5.0 -42.69   -79.76 -0.24  47.31  209.00 -76.49
+-- by entry
+             ret  ret_med   exp  trades
+entry                                  
+breakout  -53.54   -78.41 -0.57  159.15
+dip       -62.51   -96.30 -0.46  393.75
+immediate -64.68   -99.79 -0.58  534.53
+rsi       -45.12   -39.58 -0.68   86.33
+zscore    -68.55   -89.30 -0.77  225.83
+-- by stop
+        ret   exp    win    mdd
+sl                             
+1.0  -89.69 -1.05  26.18 -90.10
+2.0  -85.35 -0.98  40.11 -86.20
+3.0  -84.66 -1.03  47.21 -85.59
+5.0  -79.97 -0.99  57.71 -82.07
+none  45.26  0.98  87.03 -52.41
+-- by trend filter
+           ret   exp  trades    mdd
+trend_n                            
+1200.0  -56.35 -0.62  207.43 -72.78
+none    -61.41 -0.61  352.41 -85.77
+
+##### results/sweep_2023-2026_coinbase_intro_t72.csv: 300 configs; hold=384.75%  period 2023-01-01 -> 2026-09-19
+beats hold: 0/300; positive: 0/300; positive expectancy/trade: 0/300
+median total return -99.3%; median expectancy/trade -1.062%
+-- top 6 by total return
+entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+  rsi 3.0 NaN   4800.0            -69.27               384.75        91          47.3                    -1.226            -72.54                61.77          15.7           56.3               2.0
+  rsi 1.5 NaN   4800.0            -70.81               384.75       101          67.3                    -1.166            -72.61                65.51          11.9           38.4               2.3
+  rsi 2.0 NaN   4800.0            -71.10               384.75        96          55.2                    -1.233            -73.37                65.62          13.6           46.1               2.2
+  rsi 4.0 NaN   4800.0            -71.36               384.75        88          42.0                    -1.339            -73.41                59.60          16.8           62.2               2.0
+  rsi 1.0 NaN   4800.0            -71.57               384.75       114           0.9                    -1.063            -72.34                71.15          10.1           29.0               2.6
+  rsi 5.0 NaN   4800.0            -71.61               384.75        85          37.6                    -1.402            -73.89                55.02          17.1           65.4               1.9
+-- bottom 3
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 1.0 NaN      NaN            -99.99               384.75       944           6.0                    -0.947            -99.99               130.51          76.4           26.3              21.2
+immediate 1.0 1.0      NaN            -99.99               384.75       851           5.3                    -1.071            -99.99               111.64          19.4            7.4              19.1
+immediate 1.0 1.0   4800.0            -99.99               384.75       844           5.9                    -1.081            -99.99                95.84          13.2            5.1              18.9
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med   exp    win  trades    mdd
+tp                                             
+1.0 -97.75   -99.88 -1.04  18.06  620.16 -97.79
+1.5 -97.32   -99.69 -1.07  57.57  556.46 -97.43
+2.0 -96.93   -99.44 -1.06  50.17  518.30 -97.10
+3.0 -96.05   -98.90 -1.06  40.59  459.84 -96.36
+4.0 -95.59   -98.04 -1.06  35.31  425.50 -95.84
+5.0 -95.18   -98.02 -1.06  32.71  404.86 -95.48
+-- by entry
+             ret  ret_med   exp  trades
+entry                                  
+breakout  -97.39   -98.82 -1.05  445.40
+dip       -97.77   -99.32 -0.90  578.90
+immediate -99.44   -99.99 -1.01  716.37
+rsi       -89.99   -92.72 -1.24  252.28
+zscore    -97.76   -99.43 -1.09  494.65
+-- by stop
+        ret   exp    win    mdd
+sl                             
+1.0  -99.43 -1.12  24.62 -99.44
+2.0  -98.39 -1.10  36.48 -98.43
+3.0  -97.03 -1.06  42.78 -97.19
+5.0  -95.44 -1.06  45.91 -95.72
+none -92.06 -0.95  45.55 -92.57
+-- by trend filter
+           ret   exp  trades    mdd
+trend_n                            
+4800.0  -94.11 -1.08  377.32 -94.38
+none    -98.83 -1.03  617.72 -98.96
+
+##### results/sweep_2023-2026_zero.csv: 300 configs; hold=390.64%  period 2023-01-01 -> 2026-09-19
+beats hold: 1/300; positive: 159/300; positive expectancy/trade: 197/300
+median total return 5.6%; median expectancy/trade 0.036%
+-- top 6 by total return
+    entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+immediate 5.0 NaN      NaN            427.87               390.64        44          97.7                     4.086            -53.84                  0.0          99.8          738.5               1.0
+immediate 3.0 NaN      NaN            388.51               390.64        69          98.6                     2.456            -53.84                  0.0          99.7          470.6               1.5
+immediate 4.0 NaN      NaN            360.32               390.64        51          98.0                     3.231            -53.84                  0.0          99.8          637.0               1.1
+immediate 2.0 NaN      NaN            342.35               390.64        98          99.0                     1.621            -53.84                  0.0          99.6          331.0               2.2
+      dip 4.0 NaN      NaN            326.82               390.64        49          98.0                     3.203            -53.48                  0.0          97.8          650.2               1.1
+immediate 1.5 NaN      NaN            323.52               390.64       126          99.2                     1.222            -53.84                  0.0          99.5          257.2               2.8
+-- bottom 3
+entry  tp  sl  trend_n  total_return_pct  buy_hold_return_pct  n_trades  win_rate_pct  expectancy_pct_per_trade  max_drawdown_pct  fees_pct_of_initial  exposure_pct  avg_bars_held  trades_per_month
+  rsi 5.0 1.0      NaN            -63.78               390.64       546          13.9                    -0.165            -69.26                  0.0          35.7           21.3              12.2
+  rsi 3.0 1.0      NaN            -56.78               390.64       578          21.6                    -0.132            -66.34                  0.0          24.8           14.0              13.0
+  rsi 4.0 1.0      NaN            -54.43               390.64       564          17.6                    -0.121            -62.72                  0.0          30.0           17.3              12.6
+-- by target (mean over entries/stops/trends): total return, expectancy, trades
+       ret  ret_med   exp    win  trades    mdd
+tp                                             
+1.0  22.68    -7.32  0.13  73.41  774.56 -46.20
+1.5  21.37   -13.22  0.18  66.70  619.36 -50.89
+2.0  31.81    -4.42  0.27  62.00  529.78 -49.82
+3.0  43.63    10.70  0.44  55.28  422.76 -49.74
+4.0  48.54    15.71  0.60  50.16  352.54 -51.53
+5.0  58.26    26.34  0.78  46.49  304.00 -52.47
+-- by entry
+             ret  ret_med   exp  trades
+entry                                  
+breakout   43.54    13.05  0.45  352.07
+dip        36.44    -6.68  0.43  508.30
+immediate  97.17    57.31  0.51  964.40
+rsi       -13.56   -26.48  0.22  221.68
+zscore     24.99    -8.94  0.41  456.05
+-- by stop
+         ret   exp    win    mdd
+sl                              
+1.0    -0.54 -0.01  30.06 -46.86
+2.0     1.72 -0.01  45.21 -48.05
+3.0    -0.50  0.00  54.96 -50.70
+5.0    13.66  0.05  66.89 -51.65
+none  174.25  1.98  97.92 -53.26
+-- by trend filter
+           ret   exp  trades    mdd
+trend_n                            
+4800.0   13.94  0.35  344.71 -46.15
+none     61.50  0.46  656.29 -54.07
