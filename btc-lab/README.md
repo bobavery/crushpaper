@@ -89,11 +89,13 @@ targets 1–5% with stops at 1x and 2x the target, with and without a 72-hour ti
 ## Paper trade on live data
 
 ```bash
-# create four accounts that differ only in the target, $10k each, Coinbase entry-tier fees
-for tp in 1.5 2 3 5; do
-  python -m btc_lab paper create --state paper/zscore_tp$tp.json --strategy flip \
-      --entry zscore --tp $tp --sl $tp --fees coinbase_intro --cash 10000
-done
+# one command: six accounts (z-score entry with 1.5/2/3/5% targets, a 1% dip-limit entry, buy-and-hold),
+# $10k each, Coinbase entry-tier fees, plus paper/step_all.sh for the scheduler
+scripts/paper_setup.sh coinbase_intro 10000
+
+# or by hand
+python -m btc_lab paper create --state paper/zscore_tp2.json --strategy flip \
+    --entry zscore --tp 2 --sl 2 --fees coinbase_intro --cash 10000
 python -m btc_lab paper create --state paper/hold.json --strategy hold --cash 10000
 
 # every 5-15 minutes (cron / launchd / Task Scheduler): only acts when an hourly bar has closed
